@@ -9,6 +9,10 @@ import shutil
 #		will have their directories moved to a "Closed" 
 #		Directory. 
 #
+#*********************************************************************
+# VERSION 1.00
+#*********************************************************************
+#
 #		Shane suggests using the request library so that I can pull the json info from 
 # 		the url without using the os library, apparently it can be really slick.
 #		also, I'd have to put the request library somewhere for the script to access it.
