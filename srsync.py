@@ -7,13 +7,13 @@ import shutil
 #	This script will sync a directory with your SR's.
 #		Open SR's will have a directory created and closed SR's
 #		will have their directories moved to a "Closed" 
-#		Directory.
+#		Directory. 
 #
 #		Shane suggests using the request library so that I can pull the json info from 
 # 		the url without using the os library, apparently it can be really slick.
 #		also, I'd have to put the request library somewhere for the script to access it.
 #		  
-#	1. First, check if the open and closed dir's exists, if they don't: 
+#		First, check if the open and closed dir's exists, if they don't: 
 # 				create the "open" directory
 #				create the "closed" directory
 #
