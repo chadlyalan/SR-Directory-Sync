@@ -21,7 +21,6 @@ def maybeCreateFolder(string):
 	os.path.exists(string) or os.mkdir(string)
 #			
 #
-#		
 #	
 def getNameOfDir():
 	# this splits the full path by /, and then returns the last item.
@@ -44,7 +43,7 @@ def getSrList(user):
 # by assigning to the slice list[:] you can mutate the existing list to contain only the items you want
 def getFolderList():
 	allFolders = os.listdir(os.getcwd())
-	allFolders[:] = [x for x in allFolders if os.path.isdir(x) and not x == 'open' and not x == 'closed']
+	allFolders[:] = [x for x in allFolders if os.path.isdir(x) and not x == 'open' and not x == 'closed'and not x == 'safe']
 	return allFolders
 
 # compare all folders against openSrs, when they match, send to open, else, send them to closed
@@ -108,6 +107,7 @@ def main():
 	# open and closed folders?
 	maybeCreateFolder('open')
 	maybeCreateFolder('closed')
+	maybeCreateFolder('safe')
 
 	# get username or name of current directory, get list of SR's, get list of 
 	# folders in current directory, and sort them to open or closed
