@@ -91,8 +91,12 @@ def moveToClosed(openList, currentList):
 				if i == openList[x]:
 					break
 				elif x == len(openList) - 1:
-					print("Moving: " + i + " to closed")
-					shutil.move(i, "../closed/")
+					try:
+						os.rmdir(i)
+						print(i, " is empty, deleted!")
+					except OSError as ex:
+						print(i + " is not empty, moving to closed")
+						shutil.move(i, "../closed/")
 		
 		
 	except Exception:
