@@ -4,6 +4,7 @@ import os
 import json
 import subprocess
 import shutil
+
 #	This script will sync a directory with your SR's.
 #		Open SR's will have a directory created and closed SR's
 #		will have their directories moved to a "Closed" 
@@ -80,6 +81,9 @@ def createOpenDir(openList):
 		if not os.path.isdir(os.getcwd() + "/" + openList[i]):
 			print(openList[i] + " doesn't exist, let's make it")
 			os.mkdir(openList[i])
+			os.chown(openList[i], 1002, 65534)
+			# this should change the ownership to user:gwsupport group:users
+			# like the rest of the folders created
 
 #	4. step through all of the openFolders and move folders that 
 # 		aren't in the opensrs list anymore to closed.
