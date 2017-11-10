@@ -11,7 +11,7 @@ import shutil
 #		Directory. 
 #
 #*********************************************************************
-# VERSION 1.00
+# VERSION 1.03
 #*********************************************************************
 #
 #		Shane suggests using the request library so that I can pull the json info from 
@@ -24,6 +24,8 @@ import shutil
 #
 def maybeCreateFolder(string):
 	os.path.exists(string) or os.mkdir(string)
+	os.chown(string, 1002, 65534)
+
 #			
 #
 #	
