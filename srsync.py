@@ -4,6 +4,7 @@ import os
 import json
 import subprocess
 import shutil
+import ConfigParser
 
 #	This script will sync a directory with your SR's.
 #		Open SR's will have a directory created and closed SR's
@@ -22,6 +23,8 @@ import shutil
 # 				create the "open" directory
 #				create the "closed" directory
 #
+
+
 def maybeCreateFolder(string):
 	os.path.exists(string) or os.mkdir(string)
 	os.chown(string, 1002, 65534)
@@ -36,7 +39,7 @@ def getNameOfDir():
 
 def getSrList(user):
 	#	a line to put the SR info into a variable
-	result = os.popen("curl http://proetus.provo.novell.com/qmon/brief-tse-json.asp?tse=%s" % user).read()
+	result = os.popen("curl -s http://proetus.provo.novell.com/qmon/brief-tse-json.asp?tse=%s" % user).read()
 	# *** Parse the string into a json object for reading
 	json_srs = json.loads(result)
 
@@ -48,20 +51,20 @@ def getSrList(user):
 #		 
 #	Create a list of directories excluding closed and open
 # by assigning to the slice list[:] you can mutate the existing list to contain only the items you want
-def getFolderList():
-	allFolders = os.listdir(os.getcwd())
+def getFolderList(path):
+	allFolders = os.listdir(path)
 	allFolders[:] = [x for x in allFolders if os.path.isdir(x) and not x == 'open' and not x == 'closed'and not x == 'safe']
 	return allFolders
 
 # compare all folders against openSrs, when they match, send to open, else, send them to closed
 
-def organizeFolders(folders, srs):
+def organizeFolders(path, folders, srs):
 	for x in folders:
 		for i in srs:
 			if x == srs[i]:
 				try:
 					print("Moving: " + x + " to open")
-					shutil.move(x, "open/")
+					shutil.move(path + x, path + "open/")
 					break
 				except Exception:
 					print(x + " something went wrong, duplicate directory name probably, here's there error: ")
@@ -70,7 +73,7 @@ def organizeFolders(folders, srs):
 				if i == len(srs) - 1:
 					try:
 						print("Moving: " + x + " to closed")
-						shutil.move(x, "closed/")
+						shutil.move(path + x, path + "closed/")
 					except Exception:
 						print(x + " something went wrong, duplicate directory name probably, here's there error: ")
 						print(Exception)
@@ -78,19 +81,19 @@ def organizeFolders(folders, srs):
 
 
 # for loop to verify the openSr has a directory for it, if it doesn't create one.
-def createOpenDir(openList):
+def createOpenDir(path, openList):
 	for i in openList:
-		if not os.path.isdir(os.getcwd() + "/" + openList[i]):
+		if not os.path.isdir(path + openList[i]):
 			print(openList[i] + " doesn't exist, let's make it")
-			os.mkdir(openList[i])
-			os.chown(openList[i], 1002, 65534)
+			os.mkdir(path + openList[i])
+			os.chown(path + openList[i], 1002, 65534)
 			# this should change the ownership to user:gwsupport group:users
 			# like the rest of the folders created
 
 #	4. step through all of the openFolders and move folders that 
 # 		aren't in the opensrs list anymore to closed.
 #	
-def moveToClosed(openList, currentList):
+def moveToClosed(path, openList, currentList):
 	try:
 		for i in currentList:
 			for x in openList:
@@ -98,11 +101,11 @@ def moveToClosed(openList, currentList):
 					break
 				elif x == len(openList) - 1:
 					try:
-						os.rmdir(i)
+						os.rmdir(path + i)
 						print(i, " is empty, deleted!")
 					except OSError as ex:
 						print(i + " is not empty, moving to closed")
-						shutil.move(i, "../closed/")
+						shutil.move(path + i, path + "../closed/")
 		
 		
 	except Exception:
@@ -117,28 +120,34 @@ def moveToClosed(openList, currentList):
 # ****************************************************************
 def main():
 	""" Main controller """
+	# 	Config file variables and username variable
+	config = ConfigParser.ConfigParser()
+	config.read('config.ini')
+	username = config.get('main','username')
+	path = config.get('main','path')
 
 	# open and closed folders?
-	maybeCreateFolder('open')
-	maybeCreateFolder('closed')
-	maybeCreateFolder('safe')
+	maybeCreateFolder(path + 'open')
+	maybeCreateFolder(path + 'closed')
+	maybeCreateFolder(path + 'safe')
 
-	# get username or name of current directory, get list of SR's, get list of 
-	# folders in current directory, and sort them to open or closed
-	username = getNameOfDir()
-	organizeFolders(getFolderList(), getSrList(username)) 
+	# get list of SR's, get list of 
+	# folders in sync directory, and sort them to open or closed
+	organizeFolders(path, getFolderList(path), getSrList(username)) 
 
 	# change to the open directory
-	os.chdir(os.getcwd() + "/open")
+	# ^ doesn't really apply anymore
+	# instead we'll update the path to include the open dir
+	path = path + 'open/'
 
 	# create dirs for each open SR if it's not already there.
-	createOpenDir(getSrList(username))
+	createOpenDir(path, getSrList(username))
 
-	# create a new list of folders in current directory (which is 'open' right now)
-	openFolders = os.listdir(os.getcwd())
+	# create a new list of folders in the open directory
+	openFolders = os.listdir(path)
 
 	# make sure to move closed SR folders out of open
-	moveToClosed(getSrList(username), openFolders)
+	moveToClosed(path, getSrList(username), openFolders)
 
 
 if __name__ == "__main__":
