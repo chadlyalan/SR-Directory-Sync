@@ -21,6 +21,18 @@
 #  import statements
 import ConfigParser
 import srsync
+import subprocess
+import readline
+
+def completer(text, state):
+    options = [i for i in commands if i.startswith(text)]
+    if state < len(options):
+        return options[state]
+    else:
+        return None
+
+readline.parse_and_bind("tab: complete")
+readline.set_completer(completer)
 
 #
 # 1. Get input from user
@@ -49,5 +61,10 @@ with open('config.ini', 'w') as configfile:
 # 3. call main from srsync
 srsync.main()
 
-# 4. set up job to run check.py
+# 4. set up job to run srsync.py
+# doesn't have to be every minute, but do it during the hours of the workday
+# * * * * * root pathinput + /safe/srsync.py >/dev/null 2>&1
+file = open(crontab, 'a')
+file.write('* * * * * root {pathinput} /safe/srsync.py >/dev/null 2>&1')
+file.close()
 
