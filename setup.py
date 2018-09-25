@@ -64,7 +64,8 @@ srsync.main()
 # 4. set up job to run srsync.py
 # doesn't have to be every minute, but do it during the hours of the workday
 # * * * * * root pathinput + /safe/srsync.py >/dev/null 2>&1
-file = open(crontab, 'a')
-file.write('* * * * * root {pathinput} /safe/srsync.py >/dev/null 2>&1')
-file.close()
+# I'll have to check to see if an entry for that user exists already.
+#file = open(crontab, 'a')
+#file.write('* * * * * root {pathinput} /safe/srsync.py >/dev/null 2>&1')
+#file.close()
 
